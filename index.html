@@ -452,6 +452,21 @@ input:focus { border-color: var(--primary); outline: none; background: #fff; }
       <button type="button" class="btn-outline" onclick="show('step2')">KEMBALI</button>
     </div>
   </form>
+
+  <div id="step-success" class="page" style="text-align: center; padding: 40px 20px;">
+  <div style="font-size: 80px; color: var(--success); margin-bottom: 20px;">
+    <i class="fas fa-check-circle"></i>
+  </div>
+  <h2 style="color: #333; font-weight: 800;">PENDAFTARAN BERHASIL!</h2>
+  <p style="font-size: 16px; color: #666; line-height: 1.6;">
+    Terima kasih, data pendaftaran <strong id="success-name"></strong> telah kami terima dengan baik.<br>
+    Silakan menunggu informasi selanjutnya melalui nomor WhatsApp yang telah didaftarkan.
+  </p>
+  <button type="button" class="btn-primary" onclick="location.reload()" style="margin-top: 30px; background: var(--secondary);">
+    <i class="fas fa-home"></i> KEMBALI KE BERANDA
+  </button>
+</div>
+  
 </div>
 
 <script>
@@ -533,16 +548,20 @@ form.onsubmit = function(e) {
   e.preventDefault();
   const btn = document.getElementById('btnKirim');
   const originalContent = btn.innerHTML;
+  
+  // Ambil nama siswa untuk ditampilkan di halaman sukses
+  const namaSiswa = document.getElementsByName('nama')[0].value;
+  
   btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> MENGIRIM...';
+  btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> MENGIRIM DATA...';
 
   const formData = new FormData(form);
   const dataObject = Object.fromEntries(formData.entries());
 
   const rupiahFields = form.querySelectorAll('.rupiah');
-  dataObject.penghasilan_ayah = rupiahFields[0].value;
-  dataObject.penghasilan_ibu = rupiahFields[1].value;
-  dataObject.penghasilan_wali = rupiahFields[2] ? rupiahFields[2].value : "";
+  dataObject.penghasilan_ayah = rupiahFields[0].value || "Rp 0";
+  dataObject.penghasilan_ibu = rupiahFields[1].value || "Rp 0";
+  dataObject.penghasilan_wali = rupiahFields[2] ? (rupiahFields[2].value || "-") : "-";
 
   const filePromises = selectedFiles.map(file => {
     return new Promise((resolve) => {
@@ -554,33 +573,33 @@ form.onsubmit = function(e) {
 
   Promise.all(filePromises).then(files => {
     const payload = { ...dataObject, files: files };
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbya56t4XxEx6MM_gfmIHvaBKO0anfl6vrbYZYZmhNnWp2xbHIiajcnhYdsrFdKyCwZF/exec';
+    const scriptURL = 'SILAKAN_ISI_URL_SCRIPT_GAS_ANDA_DISINI';
 
     fetch(scriptURL, {
       method: 'POST',
-      mode: 'no-cors', // Tetap gunakan no-cors agar tidak error CORS
+      mode: 'no-cors',
       body: JSON.stringify(payload)
     })
     .then(() => {
-      // Karena no-cors tidak bisa baca respon, kita langsung 
-      // asumsikan berhasil jika tidak masuk ke .catch
-      alert("BERHASIL!\nData Daftar Ulang telah kami terima.");
+      // TAMPILKAN HALAMAN SUKSES (Tanpa Alert)
+      document.getElementById('success-name').innerText = namaSiswa;
+      show('step-success'); 
+      
+      // Reset form di belakang layar
       form.reset();
       selectedFiles = [];
       renderFileList();
-      show('home'); // Ini akan mengembalikan user ke halaman depan (animasi)
     })
     .catch(error => {
-      alert("Gagal mengirim: " + error.message);
-    })
-    .finally(() => {
+      alert("Maaf, terjadi kesalahan: " + error.message);
       btn.disabled = false;
       btn.innerHTML = originalContent;
     });
   });
 };
+
 </script>
 </body>
-
 </html>
+
 
