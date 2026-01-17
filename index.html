@@ -459,8 +459,8 @@ input:focus { border-color: var(--primary); outline: none; background: #fff; }
   </div>
   <h2 style="color: #333; font-weight: 800;">PENDAFTARAN BERHASIL!</h2>
   <p style="font-size: 16px; color: #666; line-height: 1.6;">
-    Terima kasih, data pendaftaran <strong id="success-name"></strong> telah kami terima dengan baik.<br>
-    Silakan menunggu informasi selanjutnya melalui nomor WhatsApp yang telah didaftarkan.
+    Terima kasih, data pendaftaran atas nama <strong id="success-name"></strong> telah kami terima<br>
+    Hubungi panitia jika ada hal yang ingin ditanyakan
   </p>
   <button type="button" class="btn-primary" onclick="location.reload()" style="margin-top: 30px; background: var(--secondary);">
     <i class="fas fa-home"></i> KEMBALI KE BERANDA
@@ -573,7 +573,7 @@ form.onsubmit = function(e) {
 
   Promise.all(filePromises).then(files => {
     const payload = { ...dataObject, files: files };
-    const scriptURL = 'SILAKAN_ISI_URL_SCRIPT_GAS_ANDA_DISINI';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbya56t4XxEx6MM_gfmIHvaBKO0anfl6vrbYZYZmhNnWp2xbHIiajcnhYdsrFdKyCwZF/exec';
 
     fetch(scriptURL, {
       method: 'POST',
@@ -601,5 +601,6 @@ form.onsubmit = function(e) {
 </script>
 </body>
 </html>
+
 
 
