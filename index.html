@@ -13,14 +13,22 @@
         }
         
         /* Pengaturan Background */
-        .bg {
-            height: 100%; 
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: cover;
-            background-attachment: fixed;
-            background-image: url("https://img.freepik.com/free-vector/school-flat-colored-illustration-with-building-landscape-welcome-back-school-headline_1284-33710.jpg?t=st=1768704093~exp=1768707693~hmac=48b2e59ab9b8303ca941382efcfdbfd0e859814118171ddb27ed6f7e016b4736"); 
-        }
+   .bg {
+    height: 100%; 
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+
+    /* --- PILIH SALAH SATU OPSI DI BAWAH --- */
+
+    /* OPSI 1: Pakai URL (Aktifkan dengan hapus tanda komentar jika ingin pakai URL) */
+    background-image: url("https://img.freepik.com/free-vector/school-flat-colored-illustration-with-building-landscape-welcome-back-school-headline_1284-33710.jpg?t=st=1768704093~exp=1768707693~hmac=48b2e59ab9b8303ca941382efcfdbfd0e859814118171ddb27ed6f7e016b4736"); 
+
+    /* OPSI 2: Pakai File Internal (Gunakan ini jika gambar sudah diupload ke GitHub) 
+    background-image: url("background-sekolah.jpg"); 
+    */
+   }
 
         /* Overlay Kaca Film */
         .overlay {
@@ -52,7 +60,7 @@
             margin-bottom: 40px; 
             opacity: 1;
             color: #ffffff;
-            max-width: 800px;
+            max-width: 1000px;
             line-height: 1.6;
             text-shadow: 2px 2px 0px #000000;
         }
