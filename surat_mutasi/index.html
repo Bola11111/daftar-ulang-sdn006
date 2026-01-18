@@ -21,9 +21,14 @@
     .btn-submit { margin: 20px; width: calc(100% - 40px); padding: 15px; font-weight: 700; border-radius: 8px; transition: 0.3s; }
     .hidden { display: none; }
     @media (max-width: 576px) { .blue-header { font-size: 1rem; letter-spacing: 2px; } .main-card { margin: 10px; } }
+    
+    /* Loading overlay */
+    #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center; visibility: hidden; }
   </style>
 </head>
 <body>
+
+<div id="loading"><div class="spinner-border text-primary"></div><span class="ms-2 fw-bold">Sedang memuat data...</span></div>
 
 <div class="blue-header">SD NEGERI 006 SUNGAI PINANG</div>
 
@@ -67,6 +72,9 @@
 </div>
 
 <script>
+  // MASUKKAN URL WEB APP ANDA DI SINI
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyzeQ8bwH_EnWGtfi05pNkh30FT9bSS25UIjDyLGc5V4fHY9LOHqy8dAI3ref1ypbb1/exec";
+
   function showSection(s) { 
     document.getElementById('home-section').classList.toggle('hidden', s !== 'home');
     document.getElementById('form-section').classList.toggle('hidden', s !== 'form');
@@ -74,11 +82,25 @@
   }
 
   let master = [];
-  window.onload = () => { google.script.run.withSuccessHandler(d => { 
-    master = d; 
-    const kS = document.getElementById('kelas');
-    [...new Set(d.map(x => x.kelas))].sort().forEach(k => { kS.innerHTML += `<option value="${k}">${k}</option>`; });
-  }).getDataSiswa(); };
+  
+  // Fungsi Ambil Data dari Google Sheets (GitHub Mode)
+  window.onload = () => { 
+    document.getElementById('loading').style.visibility = 'visible';
+    fetch(`${WEB_APP_URL}?action=getSiswa`)
+      .then(response => response.json())
+      .then(d => {
+        master = d; 
+        const kS = document.getElementById('kelas');
+        [...new Set(d.map(x => x.kelas))].sort().forEach(k => { 
+          kS.innerHTML += `<option value="${k}">${k}</option>`; 
+        });
+        document.getElementById('loading').style.visibility = 'hidden';
+      })
+      .catch(err => {
+        alert("Gagal memuat data. Pastikan URL Web App benar dan sudah di-deploy.");
+        console.error(err);
+      });
+  };
 
   function filterSiswa() {
     const k = document.getElementById('kelas').value;
@@ -105,25 +127,43 @@
 
   document.getElementById('mutasiForm').onsubmit = function(e) {
     e.preventDefault();
-    const b = document.getElementById('btn'); b.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Memproses...'; b.disabled = true;
+    const b = document.getElementById('btn'); 
+    b.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Memproses...'; 
+    b.disabled = true;
+    
     const file = document.getElementById('fileIn').files[0];
     const reader = new FileReader();
     reader.onload = function(r) {
-      const obj = {
-        kelas: document.getElementById('kelas').value, nama: document.getElementById('nama').value, jk: document.getElementById('jk').value,
-        nisn: document.getElementById('nisn').value, tempatLahir: document.getElementById('tempatLahir').value,
-        tanggalLahir: document.getElementById('tanggalLahir').value, sekolahTujuan: document.getElementById('sekolahTujuan').value,
-        npsn: document.getElementById('npsn').value, alamat: document.getElementById('alamat').value, 
-        kelurahan: document.getElementById('kel').value, kecamatan: document.getElementById('kec').value, 
-        kota: document.getElementById('kota').value, provinsi: document.getElementById('prov').value,
-        tanggalMutasi: document.getElementById('tglMutasi').value
+      const payload = {
+        obj: {
+          kelas: document.getElementById('kelas').value, nama: document.getElementById('nama').value, jk: document.getElementById('jk').value,
+          nisn: document.getElementById('nisn').value, tempatLahir: document.getElementById('tempatLahir').value,
+          tanggalLahir: document.getElementById('tanggalLahir').value, sekolahTujuan: document.getElementById('sekolahTujuan').value,
+          npsn: document.getElementById('npsn').value, alamat: document.getElementById('alamat').value, 
+          kelurahan: document.getElementById('kel').value, kecamatan: document.getElementById('kec').value, 
+          kota: document.getElementById('kota').value, provinsi: document.getElementById('prov').value,
+          tanggalMutasi: document.getElementById('tglMutasi').value
+        },
+        fileData: {data: r.target.result.split(',')[1], type: file.type}
       };
-      google.script.run.withSuccessHandler(res => { 
+
+      // Kirim Data via POST (GitHub Mode)
+      fetch(WEB_APP_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(res => {
         if(confirm(res.status + "\n\nApakah Anda ingin mengunduh Surat Mutasi sekarang?")) {
            window.open(res.downloadUrl, '_blank');
         }
         location.reload(); 
-      }).processMutation(obj, {data: r.target.result.split(',')[1], type: file.type});
+      })
+      .catch(err => {
+        alert("Terjadi kesalahan saat mengirim data.");
+        b.innerHTML = 'KIRIM & PROSES';
+        b.disabled = false;
+      });
     };
     reader.readAsDataURL(file);
   };
