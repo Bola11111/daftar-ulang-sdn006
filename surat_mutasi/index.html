@@ -91,7 +91,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   // PASTIKAN URL WEB APP GS ANDA SUDAH BENAR
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzy3bXR5jTD6z7JYTUHfa34M1cs3AleROOD3q-ASAroudxqyPdrA22Ak0V2KhtTHu7W/exec";
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwi7_S6Sh9myQtklmDIVGe0nZBCkVTytJBJiPLkog2nOlrXASzqyJJBALHIQ_FzL9_o/exec";
 
   function showSection(s) { 
     document.getElementById('home-section').classList.toggle('hidden', s !== 'home');
@@ -193,7 +193,7 @@
       .then(res => {
         if(res.status === "Sukses") {
           // ISI PESAN KE MODAL HTML
-          document.getElementById('successMsg').innerHTML = "Data mutasi siswa <b>" + res.nama + "</b> telah berhasil dicatat dan database telah diperbarui.<br>Hubungi admin untuk cetak Surat Mutasi";
+          document.getElementById('successMsg').innerHTML = "Data mutasi siswa <b>" + res.nama + "</b> telah berhasil dicatat dan<br> database telah diperbarui<br>Hubungi admin untuk cetak Surat Mutasi";
           // TAMPILKAN MODAL
           const myModal = new bootstrap.Modal(document.getElementById('successModal'));
           myModal.show();
