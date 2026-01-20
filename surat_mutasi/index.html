@@ -6,6 +6,8 @@
   <title>Layanan Mutasi - SDN 006 Sungai Pinang</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     body { background-color: #f4f7fa; font-family: 'Segoe UI', sans-serif; padding-bottom: 50px; }
     .blue-header { 
@@ -34,11 +36,17 @@
 
 <div class="container">
   <div id="home-section" class="text-center p-5 bg-white rounded-3 shadow-sm mx-auto mt-4" style="max-width: 700px;">
-    <i class="bi bi-file-earmark-text-fill text-primary" style="font-size: 4rem;"></i>
-    <h4 class="fw-bold mt-3">Layanan Mutasi Siswa</h4>
-    <p class="text-muted mb-4">Gunakan formulir ini untuk memproses data mutasi secara otomatis.</p>
-    <button class="btn btn-primary btn-lg px-5 fw-bold w-100 shadow" onclick="showSection('form')">BUAT FORMULIR BARU</button>
+  <i class="bi bi-file-earmark-lock2-fill text-primary" style="font-size: 4rem;"></i>
+  <h4 class="fw-bold mt-3">Layanan Mutasi Siswa</h4>
+  <p class="text-muted mb-4">Silakan masukkan NISN untuk mengakses formulir.</p>
+  
+  <div class="mb-3 mx-auto" style="max-width: 320px;">
+    <input type="number" id="inputNisnKunci" class="form-control text-center fw-bold p-3 border-primary" placeholder="MASUKKAN NISN SISWA">
+    <small id="errorNisn" class="text-danger fw-bold mt-2 d-none">Periksa lagi NISN!</small>
   </div>
+
+  <button id="btnVerifikasi" class="btn btn-primary btn-lg px-5 fw-bold w-100 shadow" onclick="verifikasiAkses()">BUAT FORMULIR BARU</button>
+</div>
 
   <div id="form-section" class="main-card hidden">
     <div class="p-3 bg-light border-bottom text-center"><h6 class="fw-bold mb-0">PENGAJUAN MUTASI KELUAR</h6></div>
@@ -90,17 +98,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  // PASTIKAN URL WEB APP GS ANDA SUDAH BENAR
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyZRrkokxO9u1IUMU2_2TFyOtL436p7iJRiXYTqcBjzH-TrYseGVi5UfjyDX-0SREc/exec";
-
-  function showSection(s) { 
-    document.getElementById('home-section').classList.toggle('hidden', s !== 'home');
-    document.getElementById('form-section').classList.toggle('hidden', s !== 'form');
-    window.scrollTo(0,0);
-  }
-
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwMqwnB6-Ka5VqoweML_6TYz98rGo6khoGZZIO_Zeo1LdoLl1lyI-2gT6Jdp-lOtvTY/exec";
   let master = [];
-  
+
+  // 1. LOAD DATA (Background)
   window.onload = () => { 
     document.getElementById('loading').style.visibility = 'visible';
     fetch(`${WEB_APP_URL}?action=getSiswa`)
@@ -114,10 +115,55 @@
         document.getElementById('loading').style.visibility = 'hidden';
       })
       .catch(err => {
-        alert("Gagal memuat data. Periksa koneksi atau URL Web App.");
+        Swal.fire('Error', 'Gagal memuat database siswa!', 'error');
         document.getElementById('loading').style.visibility = 'hidden';
       });
   };
+
+  // 2. VERIFIKASI NISN (Tampilan Keren)
+  function verifikasiAkses() {
+    const nisnInput = document.getElementById('inputNisnKunci').value;
+    const btn = document.getElementById('btnVerifikasi');
+    const errMsg = document.getElementById('errorNisn');
+
+    if (!nisnInput) {
+      Swal.fire({ icon: 'warning', title: 'Oops...', text: 'Masukkan NISN Anda!', confirmButtonColor: '#1a237e' });
+      return;
+    }
+
+    const siswa = master.find(x => x.nisn.toString().trim() === nisnInput.toString().trim());
+
+    if (siswa) {
+      Swal.fire({
+        title: 'Akses Diterima! ✅',
+        html: `Selamat Datang,<br><b style="font-size:1.2rem; color:#1a237e;">${siswa.nama}</b>`,
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        didClose: () => {
+          showSection('form');
+          document.getElementById('kelas').value = siswa.kelas;
+          filterSiswa();
+          document.getElementById('nama').value = siswa.nama;
+          isiData();
+        }
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'NISN Tidak Terdaftar',
+        text: 'Periksa kembali nomor NISN atau hubungi Admin sekolah.',
+        confirmButtonColor: '#d33'
+      });
+    }
+  }
+
+  function showSection(s) { 
+    document.getElementById('home-section').classList.toggle('hidden', s !== 'home');
+    document.getElementById('form-section').classList.toggle('hidden', s !== 'form');
+    window.scrollTo(0,0);
+  }
 
   function filterSiswa() {
     const k = document.getElementById('kelas').value;
@@ -142,24 +188,17 @@
 
   function validate() {
     const v = (id) => document.getElementById(id).value;
-    const isOk = (
-      v('nama') && 
-      v('sekolahTujuan') && 
-      v('kota') && 
-      v('prov') && 
-      v('tglMutasi') && 
-      document.getElementById('fileIn').files.length > 0 && 
-      document.getElementById('cek').checked
-    );
+    const isOk = (v('nama') && v('sekolahTujuan') && v('kota') && v('prov') && v('tglMutasi') && document.getElementById('fileIn').files.length > 0 && document.getElementById('cek').checked);
     const btn = document.getElementById('btn');
     btn.disabled = !isOk;
     btn.className = isOk ? "btn btn-success btn-submit shadow" : "btn btn-primary btn-submit";
   }
 
+  // 3. SUBMIT FORM (Notifikasi Keren)
   document.getElementById('mutasiForm').onsubmit = function(e) {
     e.preventDefault();
     const b = document.getElementById('btn'); 
-    b.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Sedang Memproses...'; 
+    b.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Mengirim Data...'; 
     b.disabled = true;
     
     const file = document.getElementById('fileIn').files[0];
@@ -185,26 +224,25 @@
         fileData: {data: r.target.result.split(',')[1], type: file.type}
       };
 
-      fetch(WEB_APP_URL, {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      })
+      fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) })
       .then(res => res.json())
       .then(res => {
         if(res.status === "Sukses") {
-          // ISI PESAN KE MODAL HTML
-          document.getElementById('successMsg').innerHTML = "Data mutasi siswa <b>" + res.nama + "</b> telah berhasil dicatat dan<br> database telah diperbarui<br>Hubungi admin untuk cetak Surat Mutasi";
-          // TAMPILKAN MODAL
-          const myModal = new bootstrap.Modal(document.getElementById('successModal'));
-          myModal.show();
+          Swal.fire({
+            title: 'Berhasil Terkirim! 📄',
+            html: `Data mutasi <b>${res.nama}</b> telah dicatat.<br>Silakan hubungi Admin untuk cetak surat.`,
+            icon: 'success',
+            confirmButtonText: 'Selesai',
+            confirmButtonColor: '#1a237e'
+          }).then(() => { location.reload(); });
         } else {
-          alert("Gagal memproses: " + (res.message || "Kesalahan server"));
+          Swal.fire('Gagal', res.message, 'error');
           b.innerHTML = 'KIRIM & PROSES';
           b.disabled = false;
         }
       })
       .catch(err => {
-        alert("Gagal terhubung ke server.");
+        Swal.fire('Error', 'Gagal terhubung ke server!', 'error');
         b.innerHTML = 'KIRIM & PROSES';
         b.disabled = false;
       });
