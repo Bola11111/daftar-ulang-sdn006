@@ -1,6 +1,7 @@
-var SS_ID = "1TvpmJgB58UL4Z1O46-0J7XfMHLeXtqVwTvmLWRlgDwQ"; 
-var FOLDER_ID = "1FtP9q4A-CmKspG05i35y-SDvKmvCrm-lsuU49ir4czdE3-VVL3sptS5RfC48p6dCU49qP2Sz";
-var TEMPLATE_ID = "1UKd8DYjV07OaNq8-lqF0rSozO8WxMXRUk0xmdUf5zVU"; 
+// 1. PENGATURAN ID (Otomatis & Terkunci)
+const SS_ID = SpreadsheetApp.getActiveSpreadsheet().getId(); 
+const FOLDER_ID = "1FtP9q4A-CmKspG05i35y-SDvKmvCrm-lsuU49ir4czdE3-VVL3sptS5RfC48p6dCU49qP2Sz";
+const TEMPLATE_ID = "1UKd8DYjV07OaNq8-lqF0rSozO8WxMXRUk0xmdUf5zVU"; 
 
 function doGet(e) {
   var action = e.parameter.action;
@@ -8,6 +9,7 @@ function doGet(e) {
     var sheet = SpreadsheetApp.openById(SS_ID).getSheetByName("database");
     var data = sheet.getDataRange().getDisplayValues(); 
     var dataSiswa = data.slice(1).map(function(r) {
+      // Pastikan index kolom sesuai dengan database Anda
       return { kelas: r[1], nama: r[2], jk: r[3], nisn: r[4], tempatLahir: r[8], tanggalLahir: r[9] };
     });
     return ContentService.createTextOutput(JSON.stringify(dataSiswa)).setMimeType(ContentService.MimeType.JSON);
@@ -24,19 +26,19 @@ function doPost(e) {
     var sheetMutasi = ss.getSheetByName("mutasi");
     var folder = DriveApp.getFolderById(FOLDER_ID);
 
-    // --- 1. PROSES WAKTU UNTUK FOOTNOTE ---
+    // --- 1. PROSES WAKTU UNTUK FOOTNOTE & LABEL ---
     var sekarang = new Date();
-    // Kita buat format dd/MM/yyyy HH:mm langsung di sini
+    // Format untuk <<timestamp>> di dokumen (WITA)
     var teksTimestamp = Utilities.formatDate(sekarang, "GMT+8", "dd/MM/yyyy HH:mm");
     
     var tglSplit = obj.tanggalMutasi.split("-"); 
     var tglLabel = tglSplit[2] + "-" + tglSplit[1] + "-" + tglSplit[0].substring(2); 
     
-    // --- 2. SOLUSI AGAR ANGKA NOL (0) TIDAK HILANG ---
-    // Tambahkan kutip satu (') agar Spreadsheet menganggapnya teks murni
+    // --- 2. VALIDASI DATA ANGKA ---
     var nisnFix = "'" + obj.nisn;
     var npsnFix = "'" + obj.npsn;
 
+    // --- 3. PROSES UPLOAD BUKTI ---
     var fileUrl = "-";
     if (fileData) {
       var namaFileBukti = "BUKTI_" + obj.nama.toUpperCase() + "_" + tglLabel;
@@ -44,7 +46,7 @@ function doPost(e) {
       fileUrl = folder.createFile(blobBukti).getUrl();
     }
 
-    // --- 3. INPUT DATA KE SHEET ---
+    // --- 4. INPUT DATA KE SHEET MUTASI ---
     sheetMutasi.appendRow([
       sekarang, obj.kelas, obj.nama, obj.jk, nisnFix, obj.tempatLahir, obj.tanggalLahir, 
       obj.sekolahTujuan, npsnFix, obj.alamat, obj.kelurahan, obj.kecamatan, obj.kota, obj.provinsi,
@@ -58,18 +60,18 @@ function doPost(e) {
     // Mengambil tanggal mutasi dari Kolom P (16) yang sudah diformat Indonesia di Sheet
     var tanggalMutasiDariSheet = sheetMutasi.getRange(lastRow, 16).getDisplayValue();
 
-    // --- 4. OLAH DOKUMEN ---
+    // --- 5. OLAH DOKUMEN SURAT ---
     var namaDocBaru = "SURAT_MUTASI_" + obj.nama.toUpperCase() + "_" + tglLabel;
     var copyFile = DriveApp.getFileById(TEMPLATE_ID).makeCopy(namaDocBaru, folder);
     var docUrl = copyFile.getUrl();
     
-    // Link surat otomatis masuk ke Kolom R (18)
+    // Masukkan link surat ke Kolom R (18)
     sheetMutasi.getRange(lastRow, 18).setValue(docUrl);
 
     var doc = DocumentApp.openById(copyFile.getId());
     var body = doc.getBody();
-	
-    // Replace Data Utama
+  
+    // Penggantian Placeholder Data Utama
     body.replaceText("<<Nama>>", obj.nama);
     body.replaceText("<<NISN>>", obj.nisn);
     body.replaceText("<<jk>>", obj.jk);
@@ -85,15 +87,15 @@ function doPost(e) {
     body.replaceText("<<Provinsi>>", obj.provinsi);
     body.replaceText("<<mutasi>>", "Mutasi");
     
-    // Tanggal Tanda Tangan (mengambil dari kolom P)
+    // Tanggal Tanda Tangan (Format Indonesia dari Kolom P)
     body.replaceText("<<tanggal mutasi>>", tanggalMutasiDariSheet);
 
-    // FOOTNOTE (Sekarang diletakkan di Body paling bawah)
+    // Pengisian Footnote Otomatis
     body.replaceText("<<timestamp>>", teksTimestamp);
-    	
+      
     doc.saveAndClose();
-	
-    // --- 5. GENERATE PDF ---
+  
+    // --- 6. KONVERSI KE PDF & KIRIM BALIK ---
     Utilities.sleep(1500); 
     var pdfBlob = copyFile.getAs(MimeType.PDF);
     var pdfBase64 = Utilities.base64Encode(pdfBlob.getBytes());
