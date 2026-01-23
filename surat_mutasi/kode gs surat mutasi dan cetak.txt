@@ -8,7 +8,7 @@ function doGet(e) {
     var sheet = SpreadsheetApp.openById(SS_ID).getSheetByName("database");
     var data = sheet.getDataRange().getDisplayValues(); 
     var dataSiswa = data.slice(1).map(function(r) {
-      return { kelas: r[1], nama: r[2], jk: r[3], nisn: r[4], tempatLahir: r[7], tanggalLahir: r[8] };
+      return { kelas: r[1], nama: r[2], jk: r[3], nisn: r[4], tempatLahir: r[8], tanggalLahir: r[9] };
     });
     return ContentService.createTextOutput(JSON.stringify(dataSiswa)).setMimeType(ContentService.MimeType.JSON);
   }
