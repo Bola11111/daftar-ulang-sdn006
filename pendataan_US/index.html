@@ -24,11 +24,17 @@
 body { 
   font-family: 'Plus Jakarta Sans', sans-serif; 
   margin: 0; 
-  padding: 10px; 
   color: var(--text-main);
   line-height: 1.6;
   min-height: 100vh;
 
+  /* LOGIKA AGAR TENGAH (CENTERING) */
+  display: flex;
+  align-items: center; /* Tengah vertikal */
+  justify-content: center; /* Tengah horizontal */
+  padding: 20px; /* Jarak aman agar kartu tidak menempel layar HP */
+  box-sizing: border-box;
+  
   /* LOGIKA BACKGROUND KOTAK (GRID) */
   background-color: var(--bg);
   background-image: 
@@ -37,8 +43,12 @@ body {
   background-size: 30px 30px; /* Ukuran kotak 30px */
 }
 
-/* Container & Card */
-.container { max-width: 650px; margin: 40px auto; position: relative; z-index: 1; }
+.container { 
+  width: 100%;
+  max-width: 650px; 
+  position: relative; 
+  z-index: 1; 
+}
 
 .card { 
   background: var(--card-bg); 
@@ -120,11 +130,11 @@ button:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; box-
 
 /* Logo Branding */
 .logo-box { 
-  width: 100px; height: 100px; background: #fff; margin: -90px auto 20px;
+  width: 140px; height: 140px; background: #fff; margin: -90px auto 20px;
   border-radius: 30px; display: flex; align-items: center; justify-content: center;
   box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #f1f5f9;
 }
-.logo-img { width: 70px; height: auto; }
+.logo-img { width: 110px; height: auto; }
 </style>
 </head>
 
@@ -134,7 +144,7 @@ button:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; box-
 
     <div id="home" class="page active">
       <div class="logo-box">
-        <img src="Logo_Kota_Samarinda.png" alt="Logo" class="logo-img">
+        <img src="https://raw.githubusercontent.com/Bola11111/sdn006sp/refs/heads/main/Logo_Kota_Samarinda.png" alt="Logo" class="logo-img">
       </div>
       <h2>PENDATAAN UJIAN SEKOLAH</h2>
       <div class="sub-header">SD NEGERI 006 SUNGAI PINANG</div>
