@@ -15,6 +15,10 @@
   --glass: rgba(255, 255, 255, 0.95);
 }
 
+/* LOGIKA SAKLAR CSS */
+[style*="--status-buka: 0"] .tombol-mulai { display: none !important; }
+[style*="--status-buka: 1"] .tombol-tutup { display: none !important; }
+
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
   background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
@@ -61,7 +65,9 @@ input:focus { border-color: var(--primary); outline: none; background: #fff; }
 .notice { background:#f0f4ff; padding:20px; border-left:5px solid var(--primary); border-radius:15px; margin-bottom:30px; }
 </style>
 </head>
-<body>
+
+<!-- ubah 0=tidak aktif / 1=aktif , untuk tombol mulai -->
+<body style="--status-buka: 1;">
 
 <div class="container">
 
@@ -71,10 +77,16 @@ input:focus { border-color: var(--primary); outline: none; background: #fff; }
     <p>SD NEGERI 006 SUNGAI PINANG</p>
     <div class="notice" style="text-align:left; font-size: 15px;">
       <i class="fas fa-info-circle"></i> <strong>Informasi:</strong><br>
-      Pastikan seluruh data diisi dengan benar sesuai dokumen resmi (Akta lahir, Kartu Keluarga dan Foto siswa)
+      Pastikan seluruh data diisi dengan benar sesuai dokumen (Akta lahir, Kartu Keluarga, foto siswa)
     </div>
-    <button class="btn-primary" onclick="show('step1')">MULAI PENGISIAN <i class="fas fa-arrow-right"></i></button>
-  </div>
+	
+    <button class="btn-primary tombol-mulai" 
+	onclick="show('step1')">MULAI PENGISIAN <i class="fas fa-arrow-right"></i></button>
+	
+	<button class="btn-primary tombol-tutup"
+	  disabled style="cursor: not-allowed;">
+	  Pendaftaran belum dibuka <i class="fas fa-lock"></i> </button>
+	  </div>
 
   <form id="mainForm">
     <div id="step1" class="page">
@@ -95,7 +107,7 @@ input:focus { border-color: var(--primary); outline: none; background: #fff; }
       </div>
       
 	  <div class="form-group">
-		<label>NISN (10 Digit)</label>
+		<label>NISN (10 Digit, jika memiliki)</label>
 		<input type="number" name="nisn" oninput="limit(this, 10)"required>
 		</div>
 		
@@ -506,7 +518,7 @@ input:focus { border-color: var(--primary); outline: none; background: #fff; }
 
       <h3><i class="fas fa-file-upload"></i> UPLOAD BERKAS (MAKS 5)</h3>
       <div class="notice" style="background:#fff3cd; border-left:5px solid #ffc107; padding:10px; font-size:13px; margin-bottom:10px;">
-        Upload Akta, KK, dan Foto Siswa (Wajib minimal 1 file).
+        Upload Akta lahir, Kartu Keluarga, dan Foto Siswa.
       </div>
       <input type="file" id="fileInput" multiple style="display:none;">
       <button type="button" class="btn-outline" onclick="document.getElementById('fileInput').click()" style="background:#e3f2fd; color:#1976d2;"><i class="fas fa-plus"></i> Tambah File</button>
