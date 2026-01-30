@@ -14,12 +14,17 @@
   --primary-dark: #1e40af;
   --secondary: #64748b; 
   --success: #10b981; 
-  --bg: #f1f5f9;         /* Warna dasar abu-abu */ 
+  --bg: #f1f5f9;
   --card-bg: #ffffff;
   --text-main: #1e293b;
   --accent: #dbeafe;
-  --grid-color: #cbd5e1; /* Warna titik-titik agar terlihat jelas */
+  --grid-color: #cbd5e1;
 }
+
+/* LOGIKA SAKLAR CSS */
+[style*="--status-buka: 0"] .tombol-mulai { display: none !important; }
+[style*="--status-buka: 1"] .tombol-tutup { display: none !important; }
+
 
 body { 
   font-family: 'Plus Jakarta Sans', sans-serif; 
@@ -133,10 +138,13 @@ button:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; box-
   box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #f1f5f9;
 }
 .logo-img { width: 110px; height: auto; }
+
 </style>
 </head>
 
-<body>
+<!-- ubah 0=tidak aktif / 1=aktif , untuk tombol mulai -->
+<body style="--status-buka: 0;">
+
 <div class="container">
   <div class="card">
 
@@ -148,16 +156,20 @@ button:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; box-
       <div class="sub-header">SD NEGERI 006 SUNGAI PINANG</div>
       
       <div class="notice" style="background: var(--accent); color: var(--primary-dark); border-color: #bfdbfe;">
-        <strong><i class="fas fa-info-circle"></i> Instruksi:</strong>
+        <strong><i class="fas fa-info-circle"></i> Informasi:</strong>
         <p style="margin: 8px 0 0 0; font-size: 0.85rem;">Isi data sesuai Akta Kelahiran/KK. Gunakan huruf kapital untuk nama.</p>
       </div>
 
       <div style="margin-top: 30px;">
-        <button class="btn-primary" onclick="show('data')">
-          Mulai Pengisian <i class="fas fa-chevron-right"></i>
-        </button>
-      </div>
-    </div>
+	  
+      <button class="btn-primary tombol-mulai" onclick="show('data')">
+	  Mulai Pengisian <i class="fas fa-chevron-right"></i> </button>
+
+      <button class="btn-primary tombol-tutup"
+	  disabled style="cursor: not-allowed;">
+	  Pendataan ditutup <i class="fas fa-lock"></i> </button> 
+	</div>
+  </div>
 
     <form id="mainForm">
       <div id="data" class="page">
